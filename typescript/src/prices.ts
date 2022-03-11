@@ -1,10 +1,10 @@
 import express from "express";
 import mysql from "mysql2/promise"
 
-async function createApp() {
+async function createApp({ port }: { port: number } = { port: 3306 }) {
     const app = express()
 
-    let connectionOptions = {host: 'localhost', user: 'root', database: 'lift_pass', password: 'mysql'}
+    let connectionOptions = { host: 'localhost', user: 'root', database: 'lift_pass', password: 'mysql', port }
     const connection = await mysql.createConnection(connectionOptions)
 
     app.put('/prices', async (req, res) => {
@@ -24,7 +24,7 @@ async function createApp() {
             [req.query.type]))[0][0]
 
         if (req.query.age < 6) {
-            res.json({cost: 0})
+            res.json({ cost: 0 })
         } else {
             if (req.query.type !== 'night') {
                 const holidays = (await connection.query(
@@ -53,35 +53,35 @@ async function createApp() {
 
                 // TODO apply reduction for others
                 if (req.query.age < 15) {
-                    res.json({cost: Math.ceil(result.cost * .7)})
+                    res.json({ cost: Math.ceil(result.cost * .7) })
                 } else {
                     if (req.query.age === undefined) {
                         let cost = result.cost * (1 - reduction / 100)
-                        res.json({cost: Math.ceil(cost)})
+                        res.json({ cost: Math.ceil(cost) })
                     } else {
                         if (req.query.age > 64) {
                             let cost = result.cost * .75 * (1 - reduction / 100)
-                            res.json({cost: Math.ceil(cost)})
+                            res.json({ cost: Math.ceil(cost) })
                         } else {
                             let cost = result.cost * (1 - reduction / 100)
-                            res.json({cost: Math.ceil(cost)})
+                            res.json({ cost: Math.ceil(cost) })
                         }
                     }
                 }
             } else {
                 if (req.query.age >= 6) {
                     if (req.query.age > 64) {
-                        res.json({cost: Math.ceil(result.cost * .4)})
+                        res.json({ cost: Math.ceil(result.cost * .4) })
                     } else {
                         res.json(result)
                     }
                 } else {
-                    res.json({cost: 0})
+                    res.json({ cost: 0 })
                 }
             }
         }
     })
-    return {app, connection}
+    return { app, connection }
 }
 
-export {createApp}
+export { createApp }
